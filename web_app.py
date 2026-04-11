@@ -18,7 +18,8 @@ import matplotlib.patches as mpatches
 app = Flask(__name__)
 DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eksoda.db")
 
-CATEGORIES = ["Φαγητό Έξω", "Ποτό", "Delivery", "Σούπερ Μάρκετ", "Συνδρομές", "Ψώνια"]
+CATEGORIES = ["Φαγητό Έξω", "Ποτό", "Delivery", "Σούπερ Μάρκετ", "Συνδρομές", "Ψώνια", "Διάφορα"]
+
 CAT_COLORS = {
     "Φαγητό Έξω":    "#FF6B6B",
     "Ποτό":          "#4ECDC4",
@@ -26,6 +27,8 @@ CAT_COLORS = {
     "Σούπερ Μάρκετ": "#6BCB77",
     "Συνδρομές":     "#4D96FF",
     "Ψώνια":         "#C77DFF",
+    "Διάφορα":       "#F4A261",
+
 }
 
 
@@ -196,6 +199,8 @@ HTML = """
       <button class="cat-btn" data-cat="Σούπερ Μάρκετ" onclick="selectCat(this)"><span class="emoji">🛒</span>Σούπερ Μάρκετ</button>
       <button class="cat-btn" data-cat="Συνδρομές" onclick="selectCat(this)"><span class="emoji">📱</span>Συνδρομές</button>
       <button class="cat-btn" data-cat="Ψώνια" onclick="selectCat(this)"><span class="emoji">🛍️</span>Ψώνια</button>
+      <button class="cat-btn" data-cat="Διάφορα" onclick="selectCat(this)"><span class="emoji">🗂️</span>Διάφορα</button>
+
     </div>
   </div>
   <button class="save-btn" onclick="saveExpense()">Αποθήκευση</button>
