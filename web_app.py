@@ -184,7 +184,7 @@ HTML = """
   <div class="card">
     <div class="card-title">Ποσό</div>
     <div class="euro-hint">€</div>
-    <input type="number" id="amount" class="amount-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+   <input type="text" id="amount" class="amount-input" placeholder="0.00" inputmode="decimal">
     <div class="amount-divider"></div>
   </div>
   <div class="card">
@@ -313,7 +313,7 @@ async function saveDate() {
 }
 
 async function saveExpense() {
-  const amount = parseFloat(document.getElementById('amount').value);
+  const amount = parseFloat(document.getElementById('amount').value.replace(',', '.'));
   if (!amount || amount <= 0) { showToast('⚠️ Εισάγετε ποσό', true); return; }
   if (!selectedCat) { showToast('⚠️ Επιλέξτε κατηγορία', true); return; }
   const btn = document.querySelector('.save-btn');
