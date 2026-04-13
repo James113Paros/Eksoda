@@ -15,7 +15,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.')
 DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eksoda.db")
 
 CATEGORIES = ["Φαγητό Έξω", "Ποτό", "Delivery", "Σούπερ Μάρκετ", "Συνδρομές", "Ψώνια", "Διάφορα"]
