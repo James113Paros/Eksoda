@@ -277,6 +277,7 @@ function selectCat(btn) {
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   selectedCat = btn.dataset.cat;
+  document.getElementById('notes-section').style.display = selectedCat === 'Διάφορα' ? 'block' : 'none';
 }
 
 function setPeriod(btn) {
