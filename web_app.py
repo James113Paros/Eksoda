@@ -344,6 +344,7 @@ async function saveExpense() {
     const data = await res.json();
     if (data.ok) {
       showToast('✅ Αποθηκεύτηκε!');
+      if (selectedCat === 'Ποτό') { const o = document.getElementById('photo-overlay'); o.style.display='flex'; setTimeout(()=>{ o.style.display='none'; }, 3000); }
       document.getElementById('amount').value = '';
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
       selectedCat = null;
