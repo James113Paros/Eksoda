@@ -45,8 +45,10 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 date TEXT NOT NULL,
                 amount REAL NOT NULL,
-                category TEXT NOT NULL
+                category TEXT NOT NULL,
+                notes TEXT DEFAULT ''
             )
+            
         """)
         conn.commit()
 
