@@ -550,10 +550,12 @@ def history():
         with get_db() as conn:
             rows = conn.execute("SELECT * FROM expenses ORDER BY date DESC LIMIT 30").fetchall()
         items = []
+        items = []
         for r in rows:
             dt = datetime.strptime(r["date"], "%Y-%m-%d %H:%M")
             items.append({"id": r["id"], "date": dt.strftime("%d/%m/%Y %H:%M"),
-                          "amount": r["amount"], "category": r["category"]})
+                          "amount": r["amount"], "category": r["category"],
+                          "notes": r["notes"] or ""})
         return jsonify({"items": items})
     except:
         return jsonify({"items": []})
