@@ -339,7 +339,7 @@ async function saveExpense() {
     const res = await fetch('/add', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ amount, category: selectedCat })
+      body: JSON.stringify({ amount, category: selectedCat, notes: document.getElementById('notes').value })
     });
     const data = await res.json();
     if (data.ok) {
