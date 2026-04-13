@@ -249,6 +249,11 @@ HTML = """
   </div>
 </div>
 
+<div id="photo-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <img src="/IMG_8312.jpg" style="max-width:80%;max-height:70vh;border-radius:20px;box-shadow:0 0 40px rgba(78,205,196,0.5);">
+  <div style="color:white;font-family:'Syne',sans-serif;font-size:20px;font-weight:800;">🍻 Υγεία!</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
