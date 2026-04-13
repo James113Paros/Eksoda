@@ -486,8 +486,8 @@ def add():
         data = request.json
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
         with get_db() as conn:
-            conn.execute("INSERT INTO expenses (date, amount, category) VALUES (?, ?, ?)",
-                         (now, float(data["amount"]), data["category"]))
+            conn.execute("INSERT INTO expenses (date, amount, category, notes) VALUES (?, ?, ?, ?)",
+                         (now, float(data["amount"]), data["category"], data.get("notes", "")))
             conn.commit()
         return jsonify({"ok": True})
     except Exception as e:
