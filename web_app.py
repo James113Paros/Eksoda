@@ -412,6 +412,7 @@ async function loadHistory() {
           <div class="exp-date" onclick="openDateModal(${e.id}, '${e.date}')" title="Πάτα για αλλαγή ημερομηνίας">
             📅 ${e.date} <span style="color:var(--accent);font-size:10px">✏️</span>
           </div>
+          ${e.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">💬 ${e.notes}</div>` : ''}
         </div>
         <button class="del-btn" onclick="deleteExpense(${e.id})" title="Διαγραφή">✕</button>
       </div>`).join('');
