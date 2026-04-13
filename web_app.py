@@ -205,6 +205,10 @@ HTML = """
 
     </div>
   </div>
+  <div id="notes-section" style="display:none" class="card">
+  <div class="card-title">Σχόλιο</div>
+  <input type="text" id="notes" placeholder="Προαιρετικό σχόλιο..." style="width:100%;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;">
+</div>
   <button class="save-btn" onclick="saveExpense()">Αποθήκευση</button>
 </div>
 
