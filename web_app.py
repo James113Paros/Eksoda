@@ -344,7 +344,8 @@ async function saveExpense() {
     const data = await res.json();
     if (data.ok) {
       showToast('✅ Αποθηκεύτηκε!');
-      if (selectedCat === 'Ποτό' || selectedCat === 'Delivery') { const o = document.getElementById('photo-overlay'); o.style.display='flex'; setTimeout(()=>{ o.style.display='none'; }, 3000); }
+      const photos = { 'Ποτό': ['/IMG_8312.jpg', '🍻 Cheersss!!!'], 'Delivery': ['/IMG_0721.jpg', '🍕 ΜΙΑΜ!'] };
+if (photos[selectedCat]) { const o = document.getElementById('photo-overlay'); document.getElementById('popup-img').src = photos[selectedCat][0]; document.getElementById('popup-text').textContent = photos[selectedCat][1]; o.style.display='flex'; setTimeout(()=>{ o.style.display='none'; }, 3000); }
       document.getElementById('amount').value = '';
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
       selectedCat = null;
