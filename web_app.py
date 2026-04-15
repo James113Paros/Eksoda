@@ -182,6 +182,7 @@ HTML = """
 <div class="header">
   <h1>💸 <span>Έξοδα</span></h1>
   <p id="header-total">Φόρτωση...</p>
+  <p id="header-remaining" style="font-size:15px;font-weight:700;margin-top:6px;"></p>
 </div>
 
 <div class="tabs">
