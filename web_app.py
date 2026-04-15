@@ -548,7 +548,6 @@ def get_budget():
         return jsonify({"ok": True, "budget": float(result[0])})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)})
-@app.route("/total")
 
 @app.route("/budget", methods=["POST"])
 def set_budget():
