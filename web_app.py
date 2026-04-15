@@ -364,6 +364,39 @@ if (photos[selectedCat]) { const o = document.getElementById('photo-overlay'); d
       document.getElementById('amount').value = '';
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
       selectedCat = null;
+      async function loadBudget() {
+  try {
+    const [totalRes, budgetRes] = await Promise.all([fetch('/total'), fetch('/budget')]);
+    const totalData = await totalRes.json();
+    const budgetData = await budgetRes.json();
+    const spent = totalData.total;
+    const budget = budgetData.budget;
+    const remaining = budget - spent;
+    const pct = Math.min((spent / budget) * 100, 100);
+    const color = remaining < 0 ? '#FF6B6B' : remaining < budget * 0.2 ? '#FFE66D' : '#6BCB77';
+    document.getElementById('header-total').textContent = `Δαπανήθηκαν: ${spent.toFixed(2)}€ / ${budget.toFixed(2)}€`;
+    document.getElementById('header-remaining').innerHTML = `<span style="color:${color}">${remaining >= 0 ? '✅ Απομένουν' : '⚠️ Υπέρβαση'}: ${Math.abs(remaining).toFixed(2)}€</span>`;
+    document.getElementById('budget-input').value = budget;
+  } catch(e) {}
+}
+
+async function saveBudget() {
+  const val = parseFloat(document.getElementById('budget-input').value);
+  if (!val || val <= 0) return;
+  try {
+    const res = await fetch('/budget', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ budget: val })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('budget-msg').textContent = '✅ Αποθηκεύτηκε!';
+      loadBudget();
+      setTimeout(() => document.getElementById('budget-msg').textContent = '', 2000);
+    }
+  } catch(e) {}
+}
       loadHeaderTotal();
     } else { showToast('❌ Σφάλμα', true); }
   } catch(e) { showToast('❌ Σφάλμα σύνδεσης', true); }
