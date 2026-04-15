@@ -193,6 +193,7 @@ HTML = """
 
 <!-- ADD -->
 <div id="tab-add" class="panel active">
+<div id="analyze-results"></div>
   <div class="card">
     <div class="card-title">Ποσό</div>
     <div class="euro-hint">€</div>
