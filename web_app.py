@@ -48,8 +48,14 @@ def init_db():
                 category TEXT NOT NULL,
                 notes TEXT DEFAULT ''
             )
-            
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        """)
+        conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('budget', '1000')")
         conn.commit()
 
 
