@@ -494,7 +494,27 @@ def make_chart(rows, total, label):
     return base64.b64encode(buf.getvalue()).decode()
 
 
-@app.route("/")
+@app.route("/budget", methods=["GET"])
+def get_budget():
+    try:
+        with get_db() as conn:
+            result = conn.execute("SELECT value FROM settings WHERE key='budget'").fetchone()
+        return jsonify({"ok": True, "budget": float(result[0])})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
+
+
+@app.route("/budget", methods=["POST"])
+def set_budget():
+    try:
+        data = request.json
+        with get_db() as conn:
+            conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('budget', ?)",
+                         (str(float(data["budget"])),))
+            conn.commit()
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
 def index():
     return render_template_string(HTML)
 
