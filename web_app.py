@@ -486,11 +486,7 @@ async function deleteExpense(id) {
 }
 
 async function loadHeaderTotal() {
-  try {
-    const res = await fetch('/total');
-    const data = await res.json();
-    document.getElementById('header-total').textContent = `Σύνολο μήνα: ${data.total.toFixed(2)}€`;
-  } catch(e) {}
+  loadBudget();
 }
 
 // Close modal on overlay click
