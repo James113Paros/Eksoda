@@ -194,6 +194,14 @@ HTML = """
 <!-- ADD -->
 <div id="tab-add" class="panel active">
 <div id="analyze-results"></div>
+<div class="card" style="margin-top:14px">
+  <div class="card-title">💰 Μηνιαίο Budget</div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <input type="number" id="budget-input" placeholder="π.χ. 500" style="flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;" inputmode="decimal">
+    <button onclick="saveBudget()" style="padding:12px 20px;background:var(--accent);border:none;border-radius:10px;color:white;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;">Αποθήκευση</button>
+  </div>
+  <p id="budget-msg" style="font-size:12px;color:var(--muted);margin-top:8px;"></p>
+</div>
   <div class="card">
     <div class="card-title">Ποσό</div>
     <div class="euro-hint">€</div>
