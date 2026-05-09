@@ -12,7 +12,7 @@ DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eksoda.db")
 
 CAT_COLORS = {
     "Φαγητό Έξω": "#FF6B6B", "Ποτό": "#4ECDC4", "Delivery": "#FFE66D",
-    "Σούπερ Μάρκετ": "#6BCB77", "Συνδρομές": "#4D96FF", "Ψώνια": "#C77DFF", "Διάφορα": "#F4A261",
+    "Σούπερ Μάρκετ": "#6BCB77", "Συνδρομές": "#4D96FF", "Ψώνια": "#C77DFF", "Διάφορα": "#F4A261","Καφές": "#C9A96E",
 }
 
 def get_db():
@@ -152,6 +152,7 @@ HTML = """
       <button class="cat-btn" data-cat="Συνδρομές" onclick="selectCat(this)"><span class="emoji">📱</span>Συνδρομές</button>
       <button class="cat-btn" data-cat="Ψώνια" onclick="selectCat(this)"><span class="emoji">🛍️</span>Ψώνια</button>
       <button class="cat-btn" data-cat="Διάφορα" onclick="selectCat(this)"><span class="emoji">🗂️</span>Διάφορα</button>
+      <button class="cat-btn" data-cat="Καφές" onclick="selectCat(this)"><span class="emoji">☕</span>Καφές</button>
     </div>
   </div>
   <div id="notes-section" style="display:none" class="card">
@@ -339,7 +340,7 @@ async function analyze() {
     });
     const data = await res.json();
     if (!data.ok) { res_div.innerHTML = '<div class="empty"><div class="empty-icon">😕</div>Δεν βρέθηκαν δεδομένα</div>'; return; }
-    const catColors = {"Φαγητό Έξω":"#FF6B6B","Ποτό":"#4ECDC4","Delivery":"#FFE66D","Σούπερ Μάρκετ":"#6BCB77","Συνδρομές":"#4D96FF","Ψώνια":"#C77DFF","Διάφορα":"#F4A261"};
+    const catColors = {"Φαγητό Έξω":"#FF6B6B","Ποτό":"#4ECDC4","Delivery":"#FFE66D","Σούπερ Μάρκετ":"#6BCB77","Συνδρομές":"#4D96FF","Ψώνια":"#C77DFF","Διάφορα":"#F4A261","Συνδρομές":"#4D96FF"};
     let barsHtml = data.categories.map(c => `
       <div class="cat-row">
         <div class="cat-row-header">
@@ -362,7 +363,7 @@ async function loadHistory() {
   try {
     const res = await fetch('/history');
     const data = await res.json();
-    const catColors = {"Φαγητό Έξω":"#FF6B6B","Ποτό":"#4ECDC4","Delivery":"#FFE66D","Σούπερ Μάρκετ":"#6BCB77","Συνδρομές":"#4D96FF","Ψώνια":"#C77DFF","Διάφορα":"#F4A261"};
+    const catColors = {"Φαγητό Έξω":"#FF6B6B","Ποτό":"#4ECDC4","Delivery":"#FFE66D","Σούπερ Μάρκετ":"#6BCB77","Συνδρομές":"#4D96FF","Ψώνια":"#C77DFF","Διάφορα":"#F4A261","Συνδρομές":"#4D96FF"};
     if (!data.items || data.items.length === 0) {
       document.getElementById('history-list').innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Δεν υπάρχουν εγγραφές</div>';
       return;
