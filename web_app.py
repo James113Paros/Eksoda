@@ -1,34 +1,39 @@
 #!/usr/bin/env python3
-import os, io, base64, sqlite3
+import os, io, base64
 from datetime import datetime, date, timedelta
 from flask import Flask, request, jsonify, render_template_string
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__, static_folder='.', static_url_path='')
-DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eksoda.db")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 CAT_COLORS = {
     "Φαγητό Έξω": "#FF6B6B", "Ποτό": "#4ECDC4", "Delivery": "#FFE66D",
-    "Σούπερ Μάρκετ": "#6BCB77", "Συνδρομές": "#4D96FF", "Ψώνια": "#C77DFF", "Διάφορα": "#F4A261","Καφές": "#C9A96E",
+    "Σούπερ Μάρκετ": "#6BCB77", "Συνδρομές": "#4D96FF", "Ψώνια": "#C77DFF",
+    "Διάφορα": "#F4A261", "Καφές": "#C9A96E",
 }
 
 def get_db():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
 def init_db():
     with get_db() as conn:
-        conn.execute("""CREATE TABLE IF NOT EXISTS expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL, amount REAL NOT NULL,
-            category TEXT NOT NULL, notes TEXT DEFAULT '')""")
-        conn.execute("""CREATE TABLE IF NOT EXISTS settings (
-            key TEXT PRIMARY KEY, value TEXT NOT NULL)""")
-        conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('budget', '1000')")
+        with conn.cursor() as cur:
+            cur.execute("""CREATE TABLE IF NOT EXISTS expenses (
+                id SERIAL PRIMARY KEY,
+                date TEXT NOT NULL,
+                amount REAL NOT NULL,
+                category TEXT NOT NULL,
+                notes TEXT DEFAULT '')""")
+            cur.execute("""CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL)""")
+            cur.execute("INSERT INTO settings (key, value) VALUES ('budget', '1000') ON CONFLICT (key) DO NOTHING")
         conn.commit()
 
 HTML = """
@@ -70,6 +75,7 @@ HTML = """
   .cat-btn[data-cat="Συνδρομές"].selected { border-color:#4D96FF; background:rgba(77,150,255,0.15); }
   .cat-btn[data-cat="Ψώνια"].selected { border-color:#C77DFF; background:rgba(199,125,255,0.15); }
   .cat-btn[data-cat="Διάφορα"].selected { border-color:#F4A261; background:rgba(244,162,97,0.15); }
+  .cat-btn[data-cat="Καφές"].selected { border-color:#C9A96E; background:rgba(201,169,110,0.15); }
   .save-btn { width:100%; padding:16px; margin-top:14px; background:linear-gradient(135deg,var(--accent),#9B8BFF); border:none; border-radius:var(--radius); color:white; font-family:'Syne',sans-serif; font-size:16px; font-weight:700; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 20px rgba(124,110,245,0.35); }
   .save-btn:hover { transform:translateY(-2px); }
   .save-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
@@ -134,7 +140,6 @@ HTML = """
   <button class="tab" onclick="showTab('history', this)">🕐 Ιστορικό</button>
 </div>
 
-<!-- ADD -->
 <div id="tab-add" class="panel active">
   <div class="card">
     <div class="card-title">Ποσό</div>
@@ -162,7 +167,6 @@ HTML = """
   <button class="save-btn" onclick="saveExpense()">Αποθήκευση</button>
 </div>
 
-<!-- ANALYZE -->
 <div id="tab-analyze" class="panel">
   <div class="card">
     <div class="card-title">Χρονικό Διάστημα</div>
@@ -191,7 +195,6 @@ HTML = """
   </div>
 </div>
 
-<!-- HISTORY -->
 <div id="tab-history" class="panel">
   <div class="card">
     <div class="card-title">Τελευταία Έξοδα</div>
@@ -199,7 +202,6 @@ HTML = """
   </div>
 </div>
 
-<!-- DATE MODAL -->
 <div class="modal-overlay" id="date-modal">
   <div class="modal">
     <div class="modal-title">✏️ Αλλαγή Ημερομηνίας</div>
@@ -211,7 +213,6 @@ HTML = """
   </div>
 </div>
 
-<!-- PHOTO OVERLAY -->
 <div id="photo-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
   <img id="popup-img" style="max-width:80%;max-height:70vh;border-radius:20px;box-shadow:0 0 40px rgba(78,205,196,0.5);">
   <div id="popup-text" style="color:white;font-family:'Syne',sans-serif;font-size:20px;font-weight:800;"></div>
@@ -230,8 +231,11 @@ const PHOTOS = {
   'Ψώνια': ['/IMG_4035.jpg', '🛍️ Slay Queen!'],
   'Φαγητό Έξω': ['/IMG_0721.jpg', '🍕 ΜΙΑΜ!'],
   'Διάφορα': ['/IMG_3049.jpg', '🤔 Τι πήραμε πάλι;'],
-  'Συνδρομές': ['/IMG_0214.jpg', '📱 Πάλι συνδρομές...']
+  'Συνδρομές': ['/IMG_0214.jpg', '📱 Πάλι συνδρομές...'],
+  'Καφές': ['/IMG_4101.jpg', '☕ Καφεδάκι πάλι;']
 };
+
+const catColors = {"Φαγητό Έξω":"#FF6B6B","Ποτό":"#4ECDC4","Delivery":"#FFE66D","Σούπερ Μάρκετ":"#6BCB77","Συνδρομές":"#4D96FF","Ψώνια":"#C77DFF","Διάφορα":"#F4A261","Καφές":"#C9A96E"};
 
 function showTab(tab, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -340,7 +344,6 @@ async function analyze() {
     });
     const data = await res.json();
     if (!data.ok) { res_div.innerHTML = '<div class="empty"><div class="empty-icon">😕</div>Δεν βρέθηκαν δεδομένα</div>'; return; }
-    const catColors = {"Φαγητό Έξω":"#FF6B6B","Ποτό":"#4ECDC4","Delivery":"#FFE66D","Σούπερ Μάρκετ":"#6BCB77","Συνδρομές":"#4D96FF","Ψώνια":"#C77DFF","Διάφορα":"#F4A261","Συνδρομές":"#4D96FF"};
     let barsHtml = data.categories.map(c => `
       <div class="cat-row">
         <div class="cat-row-header">
@@ -363,7 +366,6 @@ async function loadHistory() {
   try {
     const res = await fetch('/history');
     const data = await res.json();
-    const catColors = {"Φαγητό Έξω":"#FF6B6B","Ποτό":"#4ECDC4","Delivery":"#FFE66D","Σούπερ Μάρκετ":"#6BCB77","Συνδρομές":"#4D96FF","Ψώνια":"#C77DFF","Διάφορα":"#F4A261","Συνδρομές":"#4D96FF"};
     if (!data.items || data.items.length === 0) {
       document.getElementById('history-list').innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Δεν υπάρχουν εγγραφές</div>';
       return;
@@ -441,8 +443,7 @@ loadBudget();
 def make_chart(rows, total, label):
     from collections import defaultdict
     sums = defaultdict(float)
-    for r in rows:
-        sums[r["category"]] += r["amount"]
+    for r in rows: sums[r["category"]] += r["amount"]
     sums = dict(sorted(sums.items(), key=lambda x: x[1], reverse=True))
     colors = [CAT_COLORS.get(cat, "#7C6EF5") for cat in sums]
     fig = plt.figure(figsize=(9, 5), facecolor="#1A1A22", layout="constrained")
@@ -475,8 +476,9 @@ def add():
         data = request.json
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
         with get_db() as conn:
-            conn.execute("INSERT INTO expenses (date, amount, category, notes) VALUES (?, ?, ?, ?)",
-                         (now, float(data["amount"]), data["category"], data.get("notes", "")))
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO expenses (date, amount, category, notes) VALUES (%s, %s, %s, %s)",
+                           (now, float(data["amount"]), data["category"], data.get("notes", "")))
             conn.commit()
         return jsonify({"ok": True})
     except Exception as e:
@@ -496,10 +498,12 @@ def analyze():
         else: start = None; end = None
         query = "SELECT * FROM expenses WHERE 1=1"
         params = []
-        if start: query += " AND date >= ?"; params.append(start)
-        if end: query += " AND date <= ?"; params.append(end + " 23:59")
+        if start: query += " AND date >= %s"; params.append(start)
+        if end: query += " AND date <= %s"; params.append(end + " 23:59")
         with get_db() as conn:
-            rows = [dict(r) for r in conn.execute(query, params).fetchall()]
+            with conn.cursor() as cur:
+                cur.execute(query, params)
+                rows = [dict(r) for r in cur.fetchall()]
         if not rows: return jsonify({"ok": False})
         total = sum(r["amount"] for r in rows)
         from collections import defaultdict
@@ -518,7 +522,9 @@ def analyze():
 def history():
     try:
         with get_db() as conn:
-            rows = conn.execute("SELECT * FROM expenses ORDER BY date DESC LIMIT 30").fetchall()
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM expenses ORDER BY date DESC LIMIT 30")
+                rows = cur.fetchall()
         items = []
         for r in rows:
             dt = datetime.strptime(r["date"], "%Y-%m-%d %H:%M")
@@ -533,7 +539,8 @@ def delete():
     try:
         data = request.json
         with get_db() as conn:
-            conn.execute("DELETE FROM expenses WHERE id = ?", (int(data["id"]),))
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM expenses WHERE id = %s", (int(data["id"]),))
             conn.commit()
         return jsonify({"ok": True})
     except Exception as e:
@@ -545,7 +552,8 @@ def update_date():
         data = request.json
         new_date = data["date"].replace("T", " ")
         with get_db() as conn:
-            conn.execute("UPDATE expenses SET date = ? WHERE id = ?", (new_date, int(data["id"])))
+            with conn.cursor() as cur:
+                cur.execute("UPDATE expenses SET date = %s WHERE id = %s", (new_date, int(data["id"])))
             conn.commit()
         return jsonify({"ok": True})
     except Exception as e:
@@ -557,8 +565,10 @@ def total():
         today = date.today()
         start = today.replace(day=1).isoformat()
         with get_db() as conn:
-            result = conn.execute("SELECT SUM(amount) FROM expenses WHERE date >= ?", (start,)).fetchone()
-        return jsonify({"total": float(result[0] or 0)})
+            with conn.cursor() as cur:
+                cur.execute("SELECT SUM(amount) FROM expenses WHERE date >= %s", (start,))
+                result = cur.fetchone()
+        return jsonify({"total": float(result["sum"] or 0)})
     except:
         return jsonify({"total": 0})
 
@@ -566,8 +576,10 @@ def total():
 def get_budget():
     try:
         with get_db() as conn:
-            result = conn.execute("SELECT value FROM settings WHERE key='budget'").fetchone()
-        return jsonify({"ok": True, "budget": float(result[0])})
+            with conn.cursor() as cur:
+                cur.execute("SELECT value FROM settings WHERE key='budget'")
+                result = cur.fetchone()
+        return jsonify({"ok": True, "budget": float(result["value"])})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)})
 
@@ -576,8 +588,9 @@ def set_budget():
     try:
         data = request.json
         with get_db() as conn:
-            conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('budget', ?)",
-                         (str(float(data["budget"])),))
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO settings (key, value) VALUES ('budget', %s) ON CONFLICT (key) DO UPDATE SET value = %s",
+                           (str(float(data["budget"])), str(float(data["budget"]))))
             conn.commit()
         return jsonify({"ok": True})
     except Exception as e:
@@ -586,10 +599,4 @@ def set_budget():
 init_db()
 
 if __name__ == "__main__":
-    import socket
-    try: ip = socket.gethostbyname(socket.gethostname())
-    except: ip = "???"
-    print(f"\n{'='*50}\n   💸  Εφαρμογή Εξόδων\n{'='*50}")
-    print(f"   Τοπικά:     http://localhost:5000")
-    print(f"   Κινητό:     http://{ip}:5000\n")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
